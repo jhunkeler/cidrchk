@@ -81,7 +81,7 @@ Furthermore, if your computer's IP address was 66.55.45.10 (i.e. you are in your
 Issuing `-v` to cidrchk will echo the return value to the console, resulting in slightly cleaner code:
 
 ```
-setenv OFFSITE `cidrchk -v 10.0.0.0/24 66.55.32.0/20`
+setenv OFFSITE `cidrchk -v 10.0.0.0/20 66.55.32.0/20`
 
 if ( ${OFFSITE} ) then
     # do something clever to prevent personal hardship
@@ -95,7 +95,7 @@ The downside to parsing a string rather than an integer is logical operators wil
 The required notation is nearly identical to TCSH:
 
 ```
-_OFFSITE=$(cidrchk 10.0.0.0/24 66.55.32.0/20 >/dev/null)
+_OFFSITE=$(cidrchk 10.0.0.0/20 66.55.32.0/20 >/dev/null)
 export OFFSITE=$?
 
 if (( ${OFFSITE} )); then
