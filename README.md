@@ -88,7 +88,7 @@ if ( ${OFFSITE} ) then
 endif
 ```
 
-The only downside parsing a string rather than an integer is that logical operators will no longer work as expected. `${OFFSITE} > "0"` is not same evaluation as `${OFFSITE} > 0`.
+The downside to parsing a string rather than an integer is logical operators will not work as expected. `${OFFSITE} > "0"` is not the same as evaluating  `${OFFSITE} > 0`.
 
 ## What about BASH?
 
