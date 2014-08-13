@@ -30,30 +30,13 @@ python setup.py install --user
 
 # What is cidrchk?
 
-`cidrchk` is a simple Python script with only one purpose: To inform a user whether or not their computer is connected to a particular network. For example, on your "work" laptop, let's assume you depend on autofs to automatically mount NFS directories at-will.
-
-However, when you are off-site or not connected to your institution's VPN, you quickly realize attempting to access these data areas causes significant delays (i.e. a *five minute* default timeout)
-
-# Options
-
-```
-usage: cidrchk [-h] [--ignore IGNORE] [--debug] [--verbose] cidr [cidr ...]
-
-Detects whether or not any ethernet devices match to a defined CIDR range.
-
-positional arguments:
-  cidr                  IP range(s) to detect
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --ignore IGNORE, -i IGNORE
-                        IP range(s) to ignore (Default: link-local and
-                        localhost)
-  --debug, -d
-  --verbose, -v
-```
+`cidrchk` is a simple Python script with only one purpose: To inform a user whether or not their computer is connected to a particular network.
 
 # How do I use it?
+
+Let's assume you depend on autofs to automatically mount NFS directories at-will.
+
+However, when you are off-site or not connected to your institution's VPN, you quickly realize attempting to access these data areas causes significant delays (i.e. a *five minute* default timeout)
 
 Consider the following **.cshrc** example:
 
@@ -118,6 +101,25 @@ export OFFSITE=$?
 if (( ${OFFSITE} )); then
     #do something clever to prevent personal hardship
 fi
+```
+
+# Options
+
+```
+usage: cidrchk [-h] [--ignore IGNORE] [--debug] [--verbose] cidr [cidr ...]
+
+Detects whether or not any ethernet devices match to a defined CIDR range.
+
+positional arguments:
+  cidr                  IP range(s) to detect
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ignore IGNORE, -i IGNORE
+                        IP range(s) to ignore (Default: link-local and
+                        localhost)
+  --debug, -d
+  --verbose, -v
 ```
 
 # Bug Reporting
