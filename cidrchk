@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+# Copyright (c) 2014, Joseph Hunkeler <jhunkeler at gmail.com>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+class ExitCode(object):
+    SUCCESS, FAIL, NO_MODULE, NO_INTERFACE = range(4)
+
+try:
+    import argparse
+except ImportError:
+    print('argparse module required.')
+    exit(ExitCode.NO_MODULE)
+
+try:
+    import netifaces
+except ImportError:
+    print('netifaces module required.')
+    exit(ExitCode.NO_MODULE)
+
+try:
+    from netaddr import IPNetwork
+except ImportError:
+    print('netaddr module required.')
+    exit(ExitCode.NO_MODULE)
+
+
+DEBUG = False
+VERBOSE = False
+
+def info(ignore, accept):
+    status = {'IGNORED':[], 'DETECTED':[], 'OTHER':[]}
+    for interface in netifaces.interfaces():
+        ignored = False
+        detected = False
+
+        try:
+            addr = netifaces.ifaddresses(interface)
+            if not netifaces.AF_INET in addr:
+                continue
+        except:
+            return None
+
+        for iface in addr[netifaces.AF_INET]:
+            if not 'addr' in iface:
+                continue
+
+            address = iface['addr']
+            for ip_range in ignore:
+                if address in ip_range:
+                    ignored = True
+
+            for ip_range in accept:
+                if address in ip_range:
+                    detected = True
+
+            if ignored:
+                if DEBUG:
+                    print('Ignored: {0} on {1}'.format(address, interface))
+                status['IGNORED'].append(address)
+                continue
+
+            if detected:
+                if DEBUG:
+                    print('Detected: {0} on {1}'.format(address, interface))
+                status['DETECTED'].append(address)
+                continue
+            
+            if DEBUG:
+                print('Detected (non-match): {0} on {1}'.format(address, interface))
+            status['OTHER'].append(address)
+    return status
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Detects whether or not any ethernet devices match to a defined CIDR range.')
+    parser.add_argument('--ignore', '-i', action='append', default=[ IPNetwork('127.0.0.0/8'), IPNetwork('169.254.0.0/16') ], type=IPNetwork, help='IP range(s) to ignore (Default: link-local and localhost)')
+    parser.add_argument('--debug', '-d', action='store_true', default=False)
+    parser.add_argument('--verbose', '-v', action='store_true', default=False)
+    parser.add_argument('cidr', nargs="+", type=IPNetwork, help='IP range(s) to detect')
+    args = parser.parse_args()
+    
+    DEBUG = args.debug
+    VERBOSE = args.verbose
+
+    status = info(args.ignore, args.cidr)
+
+    if status is None:
+        if DEBUG:
+            print("No ethernet interface detected")
+        if VERBOSE:
+            print(ExitCode.NO_INTERFACE)
+        exit(ExitCode.NO_INTERFACE)
+
+    if not status['DETECTED']:
+        if DEBUG:
+            print("No ethernet interface is operating at the defined range")
+        if VERBOSE:
+            print(ExitCode.FAIL)
+        exit(ExitCode.FAIL)
+
+    if DEBUG:
+        print("A network interface matched defined range")
+    if VERBOSE:
+        print(ExitCode.SUCCESS)
+
+    exit(ExitCode.SUCCESS)
