@@ -12,7 +12,7 @@ As long as your `setuptools` installation is reasonably up to date, `setup.py` w
 ### 1. Clone the cidrchk git repository
 
 ```
-git clone https://bitbucket.org/jhunkeler/cidrchk.git
+git clone https://github.com/jhunkeler/cidrchk.git
 ```
 
 ### 2. Install the script
@@ -124,6 +124,6 @@ optional arguments:
 
 # Bug Reporting
 
-Submit bug reports via this project's issue tracker: https://bitbucket.org/jhunkeler/cidrchk/issues
+Submit bug reports via this project's issue tracker: https://github.com/jhunkeler/cidrchk/issues
 
 Please remember to include your computer's operating system, the name of the shell you executed cidrchk from, the output of `cidrchk -d`, and any relevant code snippets you may have.
